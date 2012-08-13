@@ -5,15 +5,19 @@ import os
 import tempfile
 import phynk.main
 
+class Args(object):
+    def __init__(self, **kw):
+        self.__dict__.update(**kw)
+
 class GatherTargetTest(unittest.TestCase):
     
     def test(self):
-        target_dir = os.path.join(os.path.split(__file__)[0], 'target')
-        db_dir = tempfile.gettempdir()
+        source_dir = os.path.join(os.path.split(__file__)[0], 'target')
+        data_dir = tempfile.gettempdir()
         
-        phynk.main.gather_target(target_dir, db_dir)
+        phynk.main.init_command(Args(source_dir=source_dir, data_dir=data_dir))
         
-        db_file = os.path.join(db_dir, 'phynk.db')
+        db_file = os.path.join(data_dir, 'phynk.db')
         with open(db_file, 'rt') as db:
             data = db.read()
             
@@ -38,12 +42,12 @@ class GatherSourceTest(unittest.TestCase):
 
         target_dir = os.path.join(os.path.split(__file__)[0], 'target')
         source_dir = os.path.join(os.path.split(__file__)[0], 'source')
-        db_dir = tempfile.gettempdir()
+        data_dir = tempfile.gettempdir()
         
-        phynk.main.gather_target(target_dir, db_dir)
-        phynk.main.collect_source(source_dir, db_dir)
+        phynk.main.init_command(Args(source_dir=target_dir, data_dir=data_dir))
+        phynk.main.sync_command(Args(source_dir=source_dir, data_dir=data_dir))
         
-        db_file = os.path.join(db_dir, 'phynk.db')
+        db_file = os.path.join(data_dir, 'phynk.db')
         with open(db_file, 'rt') as db:
             data = db.read()
 
@@ -61,7 +65,7 @@ class GatherSourceTest(unittest.TestCase):
             self.failUnless('paris.jpg,2468952' in data)
             self.failUnless('The King of Sweden 2.png,1247728' in data)
             
-            tmpdirfiles = os.listdir(db_dir)
+            tmpdirfiles = os.listdir(data_dir)
             self.failUnless('2011-10-06 17.29.43.jpg' in tmpdirfiles)
             self.failUnless('paris.jpg' in tmpdirfiles)
             self.failUnless('The King of Sweden 2.png' in tmpdirfiles)            
@@ -74,7 +78,7 @@ class GatherSourceTest(unittest.TestCase):
                              'paris.jpg',
                              'The King of Sweden 2.png',
                              'phynk.db'):
-                os.unlink(os.path.join(db_dir, filename))
+                os.unlink(os.path.join(data_dir, filename))
         
         
 if __name__ == '__main__':

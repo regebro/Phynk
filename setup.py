@@ -3,6 +3,12 @@ import sys, os
 
 version = '0.1'
 
+if (sys.version_info > (3, 2) or 
+    (sys.version_info < (3,) and sys.version_info > (2,7))):
+    requires = []
+else:
+    requires = ['argparse']
+
 #TODO: Make setuptools create a phynk script in the [/usr/local/]bin directory.
 long_description = open('README.rst').read()
 
@@ -27,5 +33,10 @@ setup(name='Phynk',
       packages=find_packages(),
       include_package_data=True,
       zip_safe=True,
+      install_requires=requires,
+      entry_points={
+          'console_scripts': [
+              'phynk=phynk.main.phynk_entry_point',
+              ]},
       test_suite='phynk.tests.test_all',
       )
