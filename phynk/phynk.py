@@ -42,7 +42,12 @@ def sync_command(args):
     with open(db_path, 'rb') as db:
         csvdb = csv.reader(db)
         header = csvdb.next()
-        if header[0] != 'Phynk v1':
+        filetype = header[0]
+        if filetype.startswith('\xef\xbb\xbf'):
+            # Somebody edited it with a brain dead editor, which inserted a
+            # BOM, even though UTF8 has no BOM.
+            filetype = filetype[3:]
+        if filetype != 'Phynk v1':
             raise ValueError('The file {} does not seem to be a Phynk database!'.format(db_path))
 
         allpics = {}

@@ -36,7 +36,7 @@ setup(name='Phynk',
       install_requires=requires,
       entry_points={
           'console_scripts': [
-              'phynk=phynk.main.phynk_entry_point',
+              'phynk=phynk.phynk:phynk_entry_point',
               ]},
       test_suite='phynk.tests.test_all',
       )

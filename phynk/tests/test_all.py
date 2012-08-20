@@ -3,7 +3,7 @@
 import unittest
 import os
 import tempfile
-import phynk.main
+from phynk import phynk
 
 class Args(object):
     def __init__(self, **kw):
@@ -15,7 +15,7 @@ class GatherTargetTest(unittest.TestCase):
         source_dir = os.path.join(os.path.split(__file__)[0], 'target')
         data_dir = tempfile.gettempdir()
         
-        phynk.main.init_command(Args(source_dir=source_dir, data_dir=data_dir))
+        phynk.init_command(Args(source_dir=source_dir, data_dir=data_dir))
         
         db_file = os.path.join(data_dir, 'phynk.db')
         with open(db_file, 'rt') as db:
@@ -44,8 +44,8 @@ class GatherSourceTest(unittest.TestCase):
         source_dir = os.path.join(os.path.split(__file__)[0], 'source')
         data_dir = tempfile.gettempdir()
         
-        phynk.main.init_command(Args(source_dir=target_dir, data_dir=data_dir))
-        phynk.main.sync_command(Args(source_dir=source_dir, data_dir=data_dir))
+        phynk.init_command(Args(source_dir=target_dir, data_dir=data_dir))
+        phynk.sync_command(Args(source_dir=source_dir, data_dir=data_dir))
         
         db_file = os.path.join(data_dir, 'phynk.db')
         with open(db_file, 'rt') as db:
