@@ -1,9 +1,20 @@
 import sys
 import os
-import codecs
 import shutil
 import csv
 import argparse
+
+IS_PY3 = sys.version_info >= (3,)
+if IS_PY3:
+    unicode = str
+    csv_mode = 't'
+    csv_kw = {'newline': '', 'encoding': 'UTF-8'}
+    encode_filename = lambda x: x
+else:
+    csv_mode = 'b'
+    csv_kw = {}
+    encode_filename = lambda x: x.encode('UTF-8')
+    
 
 DB_FILENAME = 'phynk.db'
 IMAGE_EXTS = set(('jpg', 'png', 'gif',))
@@ -20,16 +31,16 @@ def init_command(args):
     data_dir = args.data_dir
     image_exts = IMAGE_EXTS # Make into an option
     db_path = os.path.join(data_dir, DB_FILENAME)
-        
-    with open(db_path, 'wb') as db:
+    
+    with open(db_path, 'w'+csv_mode, **csv_kw) as db:
         csvdb = csv.writer(db)
         csvdb.writerow(['Phynk v1', 'NAME'])
 
         for root, filename, stat in gather(source_dir, image_exts):
             try:
-                csvdb.writerow([filename.encode('UTF-8'), str(stat.st_size), str(stat.st_mtime)])
+                csvdb.writerow([encode_filename(filename), str(stat.st_size), str(stat.st_mtime)])
             except:
-                csvdb.writerow([filename.encode('UTF-8'), str(stat.st_size), str(stat.st_mtime)])
+                csvdb.writerow([encode_filename(filename), str(stat.st_size), str(stat.st_mtime)])
                     
 
 def sync_command(args):
@@ -39,29 +50,30 @@ def sync_command(args):
     
     db_path = os.path.join(data_dir, DB_FILENAME)
         
-    with open(db_path, 'rb') as db:
+    with open(db_path, 'r'+csv_mode, **csv_kw) as db:
         csvdb = csv.reader(db)
-        header = csvdb.next()
+        header = next(csvdb)
         filetype = header[0]
         if filetype.startswith('\xef\xbb\xbf'):
             # Somebody edited it with a brain dead editor, which inserted a
             # BOM, even though UTF8 has no BOM.
             filetype = filetype[3:]
         if filetype != 'Phynk v1':
-            raise ValueError('The file {} does not seem to be a Phynk database!'.format(db_path))
+            raise ValueError('The file {0} does not seem to be a Phynk database!'.format(db_path))
 
         allpics = {}
     
         for fileinfo in csvdb:
             
             filename, size, mtime = fileinfo
-            filename = filename.decode('UTF-8')
+            if not IS_PY3:
+                filename = filename.decode('UTF-8')
             size = int(size)
             mtime = float(mtime)
             
             allpics[filename] = mtime
             
-    with open(db_path, 'ab') as db:
+    with open(db_path, 'a'+csv_mode, **csv_kw) as db:
         csvdb = csv.writer(db)
         new_files = 0
         for root, filename, stat in gather(source_dir, image_exts):
@@ -81,10 +93,10 @@ def sync_command(args):
                 # Re-raise the original exception
                 raise
             new_files += 1
-            csvdb.writerow([filename.encode('UTF-8'), str(stat.st_size), str(stat.st_mtime)])
+            csvdb.writerow([encode_filename(filename), str(stat.st_size), str(stat.st_mtime)])
             
         #TODO: Print a summary
-        print("{} new files found".format(new_files))
+        print("{0} new files found".format(new_files))
 
 def phynk_entry_point():
     parser = argparse.ArgumentParser('phynk', description='Photo synchronization utility')

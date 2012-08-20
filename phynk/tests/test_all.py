@@ -20,8 +20,8 @@ class GatherTargetTest(unittest.TestCase):
         db_file = os.path.join(data_dir, 'phynk.db')
         with open(db_file, 'rt') as db:
             data = db.read()
-            
-        self.failUnless(data.startswith('Phynk v1,NAME\r\n'))
+        
+        self.failUnless(data.startswith('Phynk v1,NAME'))
         self.failUnless('Petter Lundborg.JPG,2007609' in data)
         self.failUnless('Coffee diagram.png,129118' in data)
         self.failUnless('Högasvägen copy.jpg,1985600' in data)
@@ -51,7 +51,7 @@ class GatherSourceTest(unittest.TestCase):
         with open(db_file, 'rt') as db:
             data = db.read()
 
-            self.failUnless(data.startswith('Phynk v1,NAME\r\n'))
+            self.failUnless(data.startswith('Phynk v1,NAME'))
             self.failUnless('Petter Lundborg.JPG,2007609' in data)
             self.failUnless('Coffee diagram.png,129118' in data)
             self.failUnless('Högasvägen copy.jpg,1985600' in data)
